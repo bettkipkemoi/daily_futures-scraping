@@ -32,3 +32,11 @@ else
 	PYTHON_BIN="/usr/bin/python3"
 	"$OSASCRIPT_BIN" "$APPLE_SCRIPT" | "$PYTHON_BIN" "$PY_SCRIPT" --out "$SCRIPT_DIR/watchlist_summary.xlsx" >> "$LOGFILE" 2>&1
 fi
+
+# Auto-commit and push to GitHub
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+DAY_NAME=$(date +%A)
+cd "$REPO_DIR"
+git add -A >> "$LOGFILE" 2>&1
+git commit -m "updated ${DAY_NAME} data" >> "$LOGFILE" 2>&1
+git push origin >> "$LOGFILE" 2>&1
