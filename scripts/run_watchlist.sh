@@ -26,11 +26,15 @@ fi
 if [ -n "$CONDA_CMD" ]; then
 	# Use conda run to execute the Python script within the 'futures' env
 	# --no-capture-output keeps stdout/stderr behavior normal
-	"$OSASCRIPT_BIN" "$APPLE_SCRIPT" | "$CONDA_CMD" run -n futures --no-capture-output python "$PY_SCRIPT" --out "$SCRIPT_DIR/watchlist_summary.xlsx" >> "$LOGFILE" 2>&1
+	OUT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/outputs"
+	mkdir -p "$OUT_DIR"
+	"$OSASCRIPT_BIN" "$APPLE_SCRIPT" | "$CONDA_CMD" run -n futures --no-capture-output python "$PY_SCRIPT" --out "$OUT_DIR/watchlist_summary.xlsx" >> "$LOGFILE" 2>&1
 else
 	# Fallback to system python
 	PYTHON_BIN="/usr/bin/python3"
-	"$OSASCRIPT_BIN" "$APPLE_SCRIPT" | "$PYTHON_BIN" "$PY_SCRIPT" --out "$SCRIPT_DIR/watchlist_summary.xlsx" >> "$LOGFILE" 2>&1
+	OUT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/outputs"
+	mkdir -p "$OUT_DIR"
+	"$OSASCRIPT_BIN" "$APPLE_SCRIPT" | "$PYTHON_BIN" "$PY_SCRIPT" --out "$OUT_DIR/watchlist_summary.xlsx" >> "$LOGFILE" 2>&1
 fi
 
 # Auto-commit and push to GitHub
