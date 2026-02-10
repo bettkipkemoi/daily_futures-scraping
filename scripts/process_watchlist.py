@@ -274,7 +274,7 @@ def write_to_excel(dfs_with_dates, out_path):
     mode = 'a' if os.path.exists(out_path) else 'w'
     try:
         with pd.ExcelWriter(out_path, engine='openpyxl', mode=mode) as writer:
-            for df, sheet_name_base in dfs:
+            for df, sheet_name_base in dfs_with_dates:
                 # Use recap_date as sheet name, fallback to timestamp if not available
                 if sheet_name_base:
                     sheet_name = sheet_name_base[:31]  # Excel sheet name max 31 chars
@@ -308,7 +308,7 @@ def write_to_excel(dfs_with_dates, out_path):
     except Exception as e:
         # fallback: try writing single sheet if append mode fails
         with pd.ExcelWriter(out_path, engine='openpyxl', mode='w') as writer:
-            for df, sheet_name_base in dfs:
+            for df, sheet_name_base in dfs_with_dates:
                 if sheet_name_base:
                     sheet_name = sheet_name_base[:31]
                 else:
