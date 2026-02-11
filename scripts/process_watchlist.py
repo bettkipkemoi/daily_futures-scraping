@@ -104,7 +104,7 @@ def parse_message(msg_text):
                         .str.replace(',', '', regex=False)
                         .str.replace('s', '', regex=False)
                         .str.replace('+', '', regex=False)
-                        .str.replace(r'^unch$', '0', regex=True, case=False),
+                        .str.replace(r'^\s*unch\w*\s*$', '0', regex=True, case=False),
                         errors='coerce'
                     )
                     print(f"Converted {col} values: ", df[col].tolist(), file=sys.stderr)
@@ -117,7 +117,7 @@ def parse_message(msg_text):
                     .str.replace('%', '', regex=False)
                     .str.replace(',', '', regex=False)
                     .str.replace('+', '', regex=False)
-                    .str.replace(r'^unch$', '0', regex=True, case=False),
+                    .str.replace(r'^\s*unch\w*\s*$', '0', regex=True, case=False),
                     errors='coerce'
                 )
                 print("Converted %Change values: ", df['%Change'].tolist(), file=sys.stderr)
