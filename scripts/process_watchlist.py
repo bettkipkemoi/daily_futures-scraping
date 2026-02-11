@@ -98,28 +98,32 @@ def parse_message(msg_text):
             for col in numeric_cols:
                 if col in df.columns:
                     print(f"Raw {col} values: ", df[col].tolist(), file=sys.stderr)
+                    raw = df[col].astype(str)
+                    unch_mask = raw.str.strip().str.match(r'^unch\w*$', case=False, na=False)
                     df[col] = pd.to_numeric(
-                        df[col]
-                        .astype(str)
+                        raw
                         .str.replace(',', '', regex=False)
                         .str.replace('s', '', regex=False)
                         .str.replace('+', '', regex=False)
                         .str.replace(r'^\s*unch\w*\s*$', '0', regex=True, case=False),
                         errors='coerce'
                     )
+                    df.loc[unch_mask, col] = 0.0
                     print(f"Converted {col} values: ", df[col].tolist(), file=sys.stderr)
             # Convert %Change: remove % prefix and convert to float (will be formatted as percentage in Excel)
             if '%Change' in df.columns:
                 print("Raw %Change values: ", df['%Change'].tolist(), file=sys.stderr)
+                raw_pct = df['%Change'].astype(str)
+                unch_mask = raw_pct.str.strip().str.match(r'^unch\w*$', case=False, na=False)
                 df['%Change'] = pd.to_numeric(
-                    df['%Change']
-                    .astype(str)
+                    raw_pct
                     .str.replace('%', '', regex=False)
                     .str.replace(',', '', regex=False)
                     .str.replace('+', '', regex=False)
                     .str.replace(r'^\s*unch\w*\s*$', '0', regex=True, case=False),
                     errors='coerce'
                 )
+                df.loc[unch_mask, '%Change'] = 0.0
                 print("Converted %Change values: ", df['%Change'].tolist(), file=sys.stderr)
         except Exception as e:
             print(f"Conversion error: {e}", file=sys.stderr)
