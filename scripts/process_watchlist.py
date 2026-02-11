@@ -99,7 +99,12 @@ def parse_message(msg_text):
                 if col in df.columns:
                     print(f"Raw {col} values: ", df[col].tolist(), file=sys.stderr)
                     df[col] = pd.to_numeric(
-                        df[col].astype(str).str.replace(',', '', regex=False).str.replace('s', '', regex=False).str.replace('+', '', regex=False), 
+                        df[col]
+                        .astype(str)
+                        .str.replace(',', '', regex=False)
+                        .str.replace('s', '', regex=False)
+                        .str.replace('+', '', regex=False)
+                        .str.replace(r'^unch$', '0', regex=True, case=False),
                         errors='coerce'
                     )
                     print(f"Converted {col} values: ", df[col].tolist(), file=sys.stderr)
@@ -107,7 +112,12 @@ def parse_message(msg_text):
             if '%Change' in df.columns:
                 print("Raw %Change values: ", df['%Change'].tolist(), file=sys.stderr)
                 df['%Change'] = pd.to_numeric(
-                    df['%Change'].astype(str).str.replace('%', '', regex=False).str.replace(',', '', regex=False).str.replace('+', '', regex=False), 
+                    df['%Change']
+                    .astype(str)
+                    .str.replace('%', '', regex=False)
+                    .str.replace(',', '', regex=False)
+                    .str.replace('+', '', regex=False)
+                    .str.replace(r'^unch$', '0', regex=True, case=False),
                     errors='coerce'
                 )
                 print("Converted %Change values: ", df['%Change'].tolist(), file=sys.stderr)
