@@ -115,6 +115,7 @@ def parse_message(msg_text):
                 print("Raw %Change values: ", df['%Change'].tolist(), file=sys.stderr)
                 raw_pct = df['%Change'].astype(str)
                 unch_mask = raw_pct.str.strip().str.match(r'^unch\w*$', case=False, na=False)
+                had_percent = raw_pct.str.contains('%', regex=False, na=False)
                 df['%Change'] = pd.to_numeric(
                     raw_pct
                     .str.replace('%', '', regex=False)
@@ -123,6 +124,8 @@ def parse_message(msg_text):
                     .str.replace(r'^\s*unch\w*\s*$', '0', regex=True, case=False),
                     errors='coerce'
                 )
+                # Keep display values consistent with the source percent text.
+                df.loc[had_percent, '%Change'] = df.loc[had_percent, '%Change'] / 100.0
                 df.loc[unch_mask, '%Change'] = 0.0
                 print("Converted %Change values: ", df['%Change'].tolist(), file=sys.stderr)
         except Exception as e:
