@@ -123,9 +123,6 @@ def parse_message(msg_text):
                     .str.replace(r'^\s*unch\w*\s*$', '0', regex=True, case=False),
                     errors='coerce'
                 )
-                # Keep display values consistent with percent-based inputs.
-                abs_pct = df['%Change'].abs()
-                df.loc[abs_pct > 1, '%Change'] = df.loc[abs_pct > 1, '%Change'] / 100.0
                 df.loc[unch_mask, '%Change'] = 0.0
                 print("Converted %Change values: ", df['%Change'].tolist(), file=sys.stderr)
         except Exception as e:
@@ -180,7 +177,7 @@ def _write_date_block(ws, current_col, df):
             # Apply number formatting
             col_name = df.columns[col_num]
             if col_name == '%Change':
-                cell.number_format = '0.00%'
+                cell.number_format = '0.00"%"'
             elif col_name == 'Time':
                 cell.number_format = 'h:mm AM/PM'
             elif col_name in ['Latest', 'Change', 'Open', 'High', 'Low']:
@@ -310,9 +307,9 @@ def write_to_excel(dfs_with_dates, out_path):
                         col_letter = ws.cell(row=1, column=col_num).column_letter
                         
                         if col_name == '%Change':
-                            # Percentage format
+                            # Percentage display without scaling
                             for row_num in range(2, len(df) + 2):
-                                ws[f'{col_letter}{row_num}'].number_format = '0.00%'
+                                ws[f'{col_letter}{row_num}'].number_format = '0.00"%"'
                         elif col_name == 'Time':
                             # Time format
                             for row_num in range(2, len(df) + 2):
@@ -343,9 +340,9 @@ def write_to_excel(dfs_with_dates, out_path):
                         col_letter = ws.cell(row=1, column=col_num).column_letter
                         
                         if col_name == '%Change':
-                            # Percentage format
+                            # Percentage display without scaling
                             for row_num in range(2, len(df) + 2):
-                                ws[f'{col_letter}{row_num}'].number_format = '0.00%'
+                                ws[f'{col_letter}{row_num}'].number_format = '0.00"%"'
                         elif col_name == 'Time':
                             # Time format
                             for row_num in range(2, len(df) + 2):
