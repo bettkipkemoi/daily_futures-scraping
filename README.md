@@ -28,7 +28,7 @@ daily-futures/
 - **Organizes by month & week** - Creates one Excel file per month with sheets for Week1, Week2, etc.
 - **Incremental updates** - Merges new data without overwriting existing dates
 - **Auto-commits to GitHub** - Commits and pushes after each run with message "updated [Day] data"
-- **Runs unattended** - Scheduled cron job with auto-wake at 2am EAT
+- **Runs unattended** - Scheduled cron job with auto-retry (30 minutes later, then 8:00am fallback if still no new data)
 
 ## Setup
 
@@ -72,7 +72,7 @@ The script needs permission for `osascript` to control Mail.app:
 
 ### 4. Set Up Cron Job
 
-The cron runs Tuesday-Saturday at 2am EAT (to process Monday-Friday recaps):
+The cron starts Tuesday-Saturday at 2am EAT (to process Monday-Friday recaps):
 
 ```bash
 # Install cron schedule
@@ -82,6 +82,12 @@ The cron runs Tuesday-Saturday at 2am EAT (to process Monday-Friday recaps):
 # Verify installation
 crontab -l
 ```
+
+Run behavior after cron starts:
+
+- First attempt runs immediately at 2:00am
+- If no new dates are added to Excel, script retries after 30 minutes
+- If still no new data, script runs one more fallback attempt at 8:00am
 
 ### 5. Configure Auto-Wake (Optional)
 
