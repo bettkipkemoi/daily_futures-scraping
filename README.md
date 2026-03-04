@@ -113,6 +113,18 @@ Run the pipeline manually:
 bash scripts/run_watchlist.sh
 ```
 
+Manual runs default to **fast mode** (no 30-minute retry or 8:00 fallback wait).
+
+Use explicit modes when needed:
+
+```bash
+# Fast run (skip long waits)
+bash scripts/run_watchlist.sh --fast
+
+# Full cron-style behavior (includes retry waits)
+bash scripts/run_watchlist.sh --full
+```
+
 Output goes to `outputs/*.xlsx` and logs to `scripts/logs/watchlist_YYYYMMDD.log`.
 
 ## How It Works

@@ -4,6 +4,45 @@
 
 set -u
 
+usage() {
+	echo "Usage: $(basename "$0") [--fast|--full]"
+	echo "  --fast  Skip 30-minute retry and 08:00 fallback waits"
+	echo "  --full  Always run full retry schedule"
+}
+
+FAST_MODE=""
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		--fast)
+			FAST_MODE=1
+			;;
+		--full)
+			FAST_MODE=0
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			echo "Unknown option: $1" >&2
+			usage >&2
+			exit 2
+			;;
+	esac
+	shift
+done
+
+# Default behavior:
+# - interactive/manual run -> fast mode (no long waits)
+# - non-interactive/cron run -> full mode (retry schedule enabled)
+if [ -z "$FAST_MODE" ]; then
+	if [ -t 1 ]; then
+		FAST_MODE=1
+	else
+		FAST_MODE=0
+	fi
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APPLE_SCRIPT="$SCRIPT_DIR/extract_mail.scpt"
 PY_SCRIPT="$SCRIPT_DIR/process_watchlist.py"
@@ -63,13 +102,13 @@ run_watchlist_once() {
 
 run_watchlist_once "initial"
 
-if [ "$LAST_RUN_STATUS" -eq 0 ] && [ "$LAST_RUN_HAS_NEW_DATA" -eq 0 ]; then
+if [ "$FAST_MODE" -eq 0 ] && [ "$LAST_RUN_STATUS" -eq 0 ] && [ "$LAST_RUN_HAS_NEW_DATA" -eq 0 ]; then
 	echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] Waiting 30 minutes before retry" >> "$LOGFILE"
 	sleep 1800
 	run_watchlist_once "retry-30m"
 fi
 
-if [ "$LAST_RUN_STATUS" -eq 0 ] && [ "$LAST_RUN_HAS_NEW_DATA" -eq 0 ]; then
+if [ "$FAST_MODE" -eq 0 ] && [ "$LAST_RUN_STATUS" -eq 0 ] && [ "$LAST_RUN_HAS_NEW_DATA" -eq 0 ]; then
 	current_h=$((10#$(date +%H)))
 	current_m=$((10#$(date +%M)))
 	current_s=$((10#$(date +%S)))
@@ -85,6 +124,10 @@ if [ "$LAST_RUN_STATUS" -eq 0 ] && [ "$LAST_RUN_HAS_NEW_DATA" -eq 0 ]; then
 	fi
 
 	run_watchlist_once "fallback-8am"
+fi
+
+if [ "$FAST_MODE" -eq 1 ] && [ "$LAST_RUN_STATUS" -eq 0 ] && [ "$LAST_RUN_HAS_NEW_DATA" -eq 0 ]; then
+	echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] Fast mode enabled; skipping retry waits" >> "$LOGFILE"
 fi
 
 # Auto-commit and push to GitHub
